@@ -1,3 +1,3 @@
-# FDA phenology
+# fda-phenology
 
-`fda.py` contains functions that implement FDA. `simulations.py` contains functions that generate sample data to demonstrate how FDA works.
+Code accompanying "Fisher Discriminant Analysis for Extracting Interpretable Phenological Information From Multivariate Time Series Data," by Conor Doherty and Meagan Mauter.

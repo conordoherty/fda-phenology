@@ -2,10 +2,12 @@ import numpy as np
 from numba import njit
 from scipy.linalg import eig
 
+@njit
 def make_class_means(x, y, class_labels):
     class_means = np.zeros((class_labels.size, x.shape[1]), dtype='float64')
     for j, label in enumerate(class_labels):
-        class_means[j] = x[y==label, :].mean(axis=0)
+        for col in range(x.shape[1]):
+            class_means[j, col] = x[y==label, col].mean()
 
     return class_means
 
@@ -29,7 +31,7 @@ def make_within_scatter(x, y, class_labels, mu_j):
     return s_w
 
 
-def make_fda_vecs(x, y, alpha=0, num_vecs=1):
+def make_fda_vecs(x, y, alpha=0, num_vecs=1, return_scatter=False):
     mu = x.mean(axis=0)
 
     class_labels = np.unique(y)
@@ -37,11 +39,13 @@ def make_fda_vecs(x, y, alpha=0, num_vecs=1):
 
     s_w = make_within_scatter(x, y, class_labels, mu_j)
     s_b = make_between_scatter(x, y, class_labels, mu, mu_j)
-    s_b = s_b+np.diag(np.ones(s_b.shape[0])*alpha)
 
-    e = eig(s_b, s_w)
+    e = eig(s_b, s_w+np.eye(s_w.shape[0])*alpha)
     idx = e[0].argsort()[::-1]
     e_vecs = e[1][:, idx]
     e_vecs = np.real(e_vecs)[:, :num_vecs]
 
-    return e_vecs
+    if return_scatter:
+        return e_vecs, s_w, s_b
+    else:
+        return e_vecs
